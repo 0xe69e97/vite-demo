@@ -1,0 +1,24 @@
+{
+  "name": "vite",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "dinglin",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "vite": "vite",
+    "vite:force": "vite --force",
+    "build": "vite build",
+    "serve": "pm2 start index.js --watch -f",
+    "stop": "pm2 stop index.js",
+    "log": "pm2 log",
+    "debugger": "node --inspect-brk ./node_modules/vite/bin/vite.js"
+  },
+  "dependencies": {
+    "@babel/plugin-transform-react-jsx-self": "^7.14.9",
+    "@babel/plugin-transform-react-jsx-source": "^7.14.5",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "ws": "^8.2.0"
+  }
+}
