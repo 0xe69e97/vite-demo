@@ -1,4 +1,4 @@
-# 自己写的小 Demo 学习 Vite
+# 自己写的小 Demo
 
 `/vite/index.js` 是主要实现逻辑。
 
