@@ -57,15 +57,15 @@ app.use(async ctx => {
     style.textContent = ${CSSFile}
     document.head.appendChild(style)
     export default {}`
-    ctx.type = 'text/javascript'
+    ctx.type = 'application/javascript'
     ctx.body = file
   } else if (requestUrl.endsWith('.svg')){
     const filePath = path.join(__dirname, `/${requestUrl}`)
     const imageFile = fs.readFileSync(filePath)
-    ctx.type = 'text/javascript'
+    ctx.type = 'application/javascript'
     ctx.body = `export default 'data:image/svg+xml;base64,${Buffer.from(imageFile, 'binary').toString('base64')}'`
   } else {
-    ctx.type = 'text/javascript'
+    ctx.type = 'application/javascript'
     ctx.body = fs.readFileSync(path.join(__dirname, `/${requestUrl}`))
   }
 })
@@ -81,6 +81,6 @@ function rewriteImport(content) {
   });
 }
 
-app.listen(3030, () => {
+app.listen(24678, () => {
   console.log('App is running')
 })
