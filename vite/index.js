@@ -3,6 +3,8 @@ import { buildSync, transformSync } from 'esbuild'
 import fs, { promises as fsp } from 'fs'
 import path from 'path'
 
+const PORT = 24678
+
 const app = new Koa()
 
 const __dirname = path.resolve(path.dirname(''));
@@ -81,6 +83,6 @@ function rewriteImport(content) {
   });
 }
 
-app.listen(24678, () => {
-  console.log('App is running')
+app.listen(PORT, () => {
+  console.log(`听我号令： ${PORT} 端口，走！`)
 })
