@@ -16,5 +16,15 @@
     </script>
     <div id="root"></div>
     <script type="module" src="./vitesrc/main.jsx"></script>
+    <script> 
+      const ws = new WebSocket('ws://localhost:1123')
+      ws.on('open', function open() {
+      ws.send('something');
+      });
+
+      ws.on('message', function incoming(message) {
+        console.log('received: %s', message);
+      });
+    </script>
   </body>
 </html>

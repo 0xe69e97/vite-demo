@@ -1,11 +1,27 @@
 import Koa from 'koa'
 import { buildSync, transformSync } from 'esbuild'
-import fs, { promises as fsp } from 'fs'
+import fs from 'fs'
+import chokidar from 'chokidar'
+import { WebSocketServer } from 'ws';
 import path from 'path'
 
 const PORT = 24678
 
 const app = new Koa()
+const Websocket = new WebSocketServer({ port: 1123 })
+
+// HMR
+Websocket.on('connection', function connection(ws) {
+  ws.on('message', function incoming(message) {
+    console.log('received: %s', message);
+  });
+  chokidar.watch('./vitesrc').on('change', changePath => {
+    const filePath = path.resolve(__dirname, changePath);
+    const data = fs.readFileSync(filePath, 'utf-8');
+    ws.send('message', data);
+  });
+
+});
 
 const __dirname = path.resolve(path.dirname(''));
 
@@ -61,7 +77,7 @@ app.use(async ctx => {
     export default {}`
     ctx.type = 'application/javascript'
     ctx.body = file
-  } else if (requestUrl.endsWith('.svg')){
+  } else if (requestUrl.endsWith('.svg')) {
     const filePath = path.join(__dirname, `/${requestUrl}`)
     const imageFile = fs.readFileSync(filePath)
     ctx.type = 'application/javascript'
