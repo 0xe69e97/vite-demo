@@ -31,27 +31,27 @@ app.use(async ctx => {
   if (requestUrl === '/') {
     // 根路径返回模版 HTML 文件
     const html = fs.readFileSync(`${__dirname}/index.html`, 'utf-8')
-    const footer = `
-    <script>
-      const ws = new WebSocket('ws://localhost:1123')
+    const footer = `<script>
+    const ws = new WebSocket('ws://localhost:1123')
 
-      ws.addEventListener('message', async function incoming(value) {
-        console.log(value.data);
-        // window.location.reload()
-        function hotUpdate() {
-          const script = document.querySelectorAll('script')
-          document.body.removeChild(script[script.length - 1])
-          const newScript = document.createElement('script')
-          newScript.type = 'module'
-          newScript.src = './vitesrc/main.jsx?import=${+new Date()}'
-          document.body.appendChild(newScript)
-        }
-        hotUpdate()
-      });
-    </script>
+    ws.addEventListener('message', async function incoming(value) {
+      console.log(value.data);
+      // window.location.reload()
+      function hotUpdate() {
+        const script = document.querySelector('script[src]');
+        document.body.removeChild(script)
+        const newScript = document.createElement('script')
+        newScript.type = 'module'
+        const dateNum = +new Date();
+        newScript.src = './vitesrc/main.jsx?import=' + dateNum
+        document.body.appendChild(newScript)
+      }
+      hotUpdate()
+    });
+  </script>
     `
     ctx.type = 'text/html'
-    ctx.body = `${html}${footer}`
+    ctx.body = `${footer}${html}`
   } else if (requestUrl.endsWith('.jsx')) {
     // jsx 文件返回 JavaScript 文件类型以及获取文件路径返回前端
     const filePath = path.join(__dirname, `/${requestUrl}`)
@@ -65,7 +65,7 @@ app.use(async ctx => {
     // 自定义 import 为需要热更新
     if (ctx.request.url.split('?')[1]?.includes('import')) {
       realCode = out.code.replace(/ from ['"](.*\.jsx.*)['"]/g, function rewriteCode(s0, s1) {
-        return ` from '${s1}?${+new Date()}'`
+        return ` from '${s1}?import=${+new Date()}'`
       })
     }
 
