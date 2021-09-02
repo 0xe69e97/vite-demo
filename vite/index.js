@@ -16,9 +16,9 @@ Websocket.on('connection', function connection(ws) {
     console.log('received: %s', message);
   });
   chokidar.watch('./vitesrc').on('change', changePath => {
-    const filePath = path.resolve(__dirname, changePath);
-    const data = fs.readFileSync(filePath, 'utf-8');
-    ws.send('message', data);
+    // const filePath = path.resolve(__dirname, changePath);
+    // const data = fs.readFileSync(filePath, 'utf-8');
+    ws.send(changePath);
   });
 
 });
@@ -26,13 +26,32 @@ Websocket.on('connection', function connection(ws) {
 const __dirname = path.resolve(path.dirname(''));
 
 app.use(async ctx => {
-  const requestUrl = ctx.request.url
+  const requestUrl = ctx.request.url.split('?')[0]
 
   if (requestUrl === '/') {
     // 根路径返回模版 HTML 文件
     const html = fs.readFileSync(`${__dirname}/index.html`, 'utf-8')
+    const footer = `
+    <script>
+      const ws = new WebSocket('ws://localhost:1123')
+
+      ws.addEventListener('message', async function incoming(value) {
+        console.log(value.data);
+        // window.location.reload()
+        function hotUpdate() {
+          const script = document.querySelectorAll('script')
+          document.body.removeChild(script[script.length - 1])
+          const newScript = document.createElement('script')
+          newScript.type = 'module'
+          newScript.src = './vitesrc/main.jsx?import=${+new Date()}'
+          document.body.appendChild(newScript)
+        }
+        hotUpdate()
+      });
+    </script>
+    `
     ctx.type = 'text/html'
-    ctx.body = html
+    ctx.body = `${html}${footer}`
   } else if (requestUrl.endsWith('.jsx')) {
     // jsx 文件返回 JavaScript 文件类型以及获取文件路径返回前端
     const filePath = path.join(__dirname, `/${requestUrl}`)
@@ -42,8 +61,16 @@ app.use(async ctx => {
       jsxFragment: 'Fragment',
       loader: 'jsx'
     })
+    let realCode = out.code
+    // 自定义 import 为需要热更新
+    if (ctx.request.url.split('?')[1]?.includes('import')) {
+      realCode = out.code.replace(/ from ['"](.*\.jsx.*)['"]/g, function rewriteCode(s0, s1) {
+        return ` from '${s1}?${+new Date()}'`
+      })
+    }
+
     ctx.type = 'application/javascript'
-    ctx.body = out.code
+    ctx.body = realCode
     return
   } else if (requestUrl.startsWith('/@modules/')) {
     const modulesName = requestUrl.replace('/@modules/', '')
